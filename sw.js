@@ -1,4 +1,4 @@
-const CACHE_NAME = 'muscu-cache-v1';
+const CACHE_NAME = 'muscu-cache-v3';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './bg-statue.jpg'];
 
 self.addEventListener('install', (e) => {
