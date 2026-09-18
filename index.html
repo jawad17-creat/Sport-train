@@ -147,15 +147,21 @@
 
   /* Exercise detail modal */
   .ex-detail-anim{margin:0 0 14px;color:var(--steel);}
+  .muscle-map-row{display:flex;gap:10px;margin-bottom:8px;}
+  .muscle-map-cell{flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center;}
+  .muscle-map-cell svg{width:100%;max-width:110px;height:auto;}
+  .muscle-legend{display:flex;justify-content:center;gap:16px;font-size:11px;color:var(--ink-soft);margin-bottom:16px;}
+  .muscle-legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:middle;}
   .ex-carousel{
     display:flex;overflow-x:auto;scroll-snap-type:x mandatory;border-radius:14px;
     border:1px solid var(--line);background:rgba(255,255,255,0.04);-webkit-overflow-scrolling:touch;
   }
   .ex-frame{
     flex:0 0 100%;scroll-snap-align:center;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;padding:18px;
+    align-items:center;justify-content:center;padding:10px;
   }
-  .ex-frame-media{width:100%;max-width:190px;aspect-ratio:1/1;}
+  .ex-frame-media{width:100%;max-width:190px;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:10px;}
+  .ex-frame-media img{width:100%;height:100%;object-fit:cover;border-radius:10px;}
   .ex-frame-label{margin-top:6px;font-size:12px;color:var(--ink-soft);}
   .ex-dots{display:flex;justify-content:center;gap:6px;margin-top:10px;}
   .ex-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.25);}
@@ -344,26 +350,26 @@ async function storageListKeys(prefix){
 
 // ---------- Bibliothèque d'exercices ----------
 const EXERCISE_LIBRARY = [
-  {name:'Pompe normal', type:'Poids du corps', pattern:'push', desc:"Mains à plat sous les épaules, corps gainé et aligné de la tête aux talons. Descendez la poitrine vers le sol en pliant les coudes, puis repoussez jusqu'à extension complète des bras."},
-  {name:'Pompe diamond', type:'Poids du corps', pattern:'push', desc:"Mains rapprochées sous le sternum, pouces et index formant un losange. Descendez en gardant les coudes proches du corps pour insister sur les triceps."},
-  {name:'Pompe piqué', type:'Poids du corps', pattern:'push', desc:"Hanches hautes, corps en V inversé comme un piqué. Pliez les coudes pour amener le sommet du crâne vers le sol, en insistant sur les épaules."},
-  {name:'Dips', type:'Poids du corps', pattern:'push', desc:"Sur des barres parallèles ou un banc, descendez le corps en pliant les coudes jusqu'à un angle de 90°, puis repoussez jusqu'à extension complète."},
-  {name:'Traction normal', type:'Poids du corps', pattern:'pull', desc:"Prise en pronation, un peu plus large que les épaules. Tirez le corps vers le haut jusqu'à ce que le menton dépasse la barre, puis redescendez contrôlé."},
-  {name:'Traction biceps', type:'Poids du corps', pattern:'pull', desc:"Prise en supination, mains rapprochées largeur d'épaules. Tirez en insistant sur la contraction des biceps en haut du mouvement."},
-  {name:'Traction australienne', type:'Poids du corps', pattern:'row', desc:"Sous une barre basse, corps incliné et gainé comme une planche. Tirez la poitrine vers la barre en gardant le corps droit."},
-  {name:'Gainage', type:'Poids du corps', pattern:'core', desc:"Appui sur avant-bras et pointes de pieds, corps aligné de la tête aux talons. Maintenez la position sans laisser tomber les hanches."},
-  {name:'Développé militaire', type:'Musculation', pattern:'press', desc:"Barre ou haltères au niveau des épaules, prise largeur d'épaules. Poussez à la verticale au-dessus de la tête sans cambrer excessivement le bas du dos."},
-  {name:'Développé couché', type:'Musculation', pattern:'press', desc:"Allongé sur un banc, barre ou haltères au-dessus de la poitrine. Descendez contrôlé jusqu'à effleurer le torse, puis repoussez."},
-  {name:'Développé incliné', type:'Musculation', pattern:'press', desc:"Banc incliné à 30-45°, même mouvement que le développé couché, en insistant sur le haut des pectoraux."},
-  {name:'Rowing', type:'Musculation', pattern:'row', desc:"Buste penché en avant, dos plat, charge tenue bras tendus. Tirez la charge vers le bas du torse en resserrant les omoplates."},
-  {name:'Élévation latérale', type:'Musculation', pattern:'press', desc:"Haltères le long du corps, bras légèrement fléchis. Levez les bras sur les côtés jusqu'à hauteur d'épaule, puis redescendez contrôlé."},
-  {name:'Curl biceps', type:'Musculation', pattern:'curl', desc:"Haltères ou barre, paumes vers l'avant, coudes fixes le long du corps. Fléchissez les coudes sans balancer le buste, puis redescendez lentement."},
-  {name:'Curl marteaux', type:'Musculation', pattern:'curl', desc:"Haltères tenus paumes face à face. Fléchissez les coudes sans tourner les poignets, en gardant les coudes fixes le long du corps."},
-  {name:'Extension triceps', type:'Musculation', pattern:'press', desc:"Haltère tenu à deux mains derrière la tête, coudes fixes pointant vers le haut. Tendez les bras vers le haut puis revenez contrôlé."},
-  {name:'Shrugs', type:'Musculation', pattern:'other', desc:"Haltères ou barre tenus le long du corps. Haussez les épaules vers les oreilles, tenez une seconde en haut, puis relâchez lentement."},
-  {name:'Squat', type:'Musculation', pattern:'squat', desc:"Pieds largeur d'épaules, dos droit, poitrine haute. Descendez les hanches comme pour s'asseoir jusqu'à cuisses parallèles au sol, puis remontez."},
-  {name:'Fentes', type:'Musculation', pattern:'squat', desc:"Un pied loin devant l'autre, descendez le genou arrière vers le sol en gardant le buste droit, puis repoussez pour revenir debout."},
-  {name:'Mollets debout', type:'Musculation', pattern:'other', desc:"Debout, montez sur la pointe des pieds en contractant les mollets, tenez une seconde, puis redescendez lentement sous le niveau de départ."}
+  {name:'Pompe normal', type:'Poids du corps', pattern:'push', muscles:{primary:['chest','triceps'],secondary:['frontDelt']}, desc:"Mains à plat sous les épaules, corps gainé et aligné de la tête aux talons. Descendez la poitrine vers le sol en pliant les coudes, puis repoussez jusqu'à extension complète des bras."},
+  {name:'Pompe diamond', type:'Poids du corps', pattern:'push', muscles:{primary:['triceps'],secondary:['chest']}, desc:"Mains rapprochées sous le sternum, pouces et index formant un losange. Descendez en gardant les coudes proches du corps pour insister sur les triceps."},
+  {name:'Pompe piqué', type:'Poids du corps', pattern:'push', muscles:{primary:['frontDelt'],secondary:['triceps','chest']}, desc:"Hanches hautes, corps en V inversé comme un piqué. Pliez les coudes pour amener le sommet du crâne vers le sol, en insistant sur les épaules."},
+  {name:'Dips', type:'Poids du corps', pattern:'push', muscles:{primary:['chest','triceps'],secondary:['frontDelt']}, desc:"Sur des barres parallèles ou un banc, descendez le corps en pliant les coudes jusqu'à un angle de 90°, puis repoussez jusqu'à extension complète."},
+  {name:'Traction normal', type:'Poids du corps', pattern:'pull', muscles:{primary:['lats'],secondary:['biceps','rearDelt']}, desc:"Prise en pronation, un peu plus large que les épaules. Tirez le corps vers le haut jusqu'à ce que le menton dépasse la barre, puis redescendez contrôlé."},
+  {name:'Traction biceps', type:'Poids du corps', pattern:'pull', muscles:{primary:['biceps','lats'],secondary:['forearm']}, desc:"Prise en supination, mains rapprochées largeur d'épaules. Tirez en insistant sur la contraction des biceps en haut du mouvement."},
+  {name:'Traction australienne', type:'Poids du corps', pattern:'row', muscles:{primary:['lats'],secondary:['biceps','traps']}, desc:"Sous une barre basse, corps incliné et gainé comme une planche. Tirez la poitrine vers la barre en gardant le corps droit."},
+  {name:'Gainage', type:'Poids du corps', pattern:'core', muscles:{primary:['abs'],secondary:['obliques']}, desc:"Appui sur avant-bras et pointes de pieds, corps aligné de la tête aux talons. Maintenez la position sans laisser tomber les hanches."},
+  {name:'Développé militaire', type:'Musculation', pattern:'press', muscles:{primary:['frontDelt'],secondary:['triceps']}, desc:"Barre ou haltères au niveau des épaules, prise largeur d'épaules. Poussez à la verticale au-dessus de la tête sans cambrer excessivement le bas du dos."},
+  {name:'Développé couché', type:'Musculation', pattern:'press', muscles:{primary:['chest'],secondary:['triceps','frontDelt']}, desc:"Allongé sur un banc, barre ou haltères au-dessus de la poitrine. Descendez contrôlé jusqu'à effleurer le torse, puis repoussez."},
+  {name:'Développé incliné', type:'Musculation', pattern:'press', muscles:{primary:['chest'],secondary:['frontDelt','triceps']}, desc:"Banc incliné à 30-45°, même mouvement que le développé couché, en insistant sur le haut des pectoraux."},
+  {name:'Rowing', type:'Musculation', pattern:'row', muscles:{primary:['lats','traps'],secondary:['biceps']}, desc:"Buste penché en avant, dos plat, charge tenue bras tendus. Tirez la charge vers le bas du torse en resserrant les omoplates."},
+  {name:'Élévation latérale', type:'Musculation', pattern:'press', muscles:{primary:['frontDelt','rearDelt'],secondary:[]}, desc:"Haltères le long du corps, bras légèrement fléchis. Levez les bras sur les côtés jusqu'à hauteur d'épaule, puis redescendez contrôlé."},
+  {name:'Curl biceps', type:'Musculation', pattern:'curl', muscles:{primary:['biceps'],secondary:['forearm']}, desc:"Haltères ou barre, paumes vers l'avant, coudes fixes le long du corps. Fléchissez les coudes sans balancer le buste, puis redescendez lentement."},
+  {name:'Curl marteaux', type:'Musculation', pattern:'curl', muscles:{primary:['biceps'],secondary:['forearm']}, desc:"Haltères tenus paumes face à face. Fléchissez les coudes sans tourner les poignets, en gardant les coudes fixes le long du corps."},
+  {name:'Extension triceps', type:'Musculation', pattern:'press', muscles:{primary:['triceps'],secondary:[]}, desc:"Haltère tenu à deux mains derrière la tête, coudes fixes pointant vers le haut. Tendez les bras vers le haut puis revenez contrôlé."},
+  {name:'Shrugs', type:'Musculation', pattern:'other', muscles:{primary:['traps'],secondary:[]}, desc:"Haltères ou barre tenus le long du corps. Haussez les épaules vers les oreilles, tenez une seconde en haut, puis relâchez lentement."},
+  {name:'Squat', type:'Musculation', pattern:'squat', muscles:{primary:['quad','glutes'],secondary:['hamstring']}, desc:"Pieds largeur d'épaules, dos droit, poitrine haute. Descendez les hanches comme pour s'asseoir jusqu'à cuisses parallèles au sol, puis remontez."},
+  {name:'Fentes', type:'Musculation', pattern:'squat', muscles:{primary:['quad','glutes'],secondary:['hamstring']}, desc:"Un pied loin devant l'autre, descendez le genou arrière vers le sol en gardant le buste droit, puis repoussez pour revenir debout."},
+  {name:'Mollets debout', type:'Musculation', pattern:'other', muscles:{primary:['calfFront','calfBack'],secondary:[]}, desc:"Debout, montez sur la pointe des pieds en contractant les mollets, tenez une seconde, puis redescendez lentement sous le niveau de départ."}
 ];
 function findLibraryExercise(name){
   if(!name) return null;
@@ -371,127 +377,94 @@ function findLibraryExercise(name){
   return EXERCISE_LIBRARY.find(e=>e.name.toLowerCase()===n) || null;
 }
 
-// Images fixes illustrant 3 phases du mouvement (départ / effort / retour), pas d'animation :
-// chaque exercice est dessiné comme un petit bonhomme (tête, torse, bras, jambes), pas juste des traits.
-const STAGE_LABELS = ['1. Départ', '2. Effort', '3. Retour'];
-
-function patternFrameSVG(pattern, stage){
-  const common = 'width="100%" height="100%" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"';
-  const head = (cy)=>`<circle cx="60" cy="${cy}" r="9" fill="currentColor"/>`;
-  const standingBase = `
-    <line x1="60" y1="27" x2="60" y2="70" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
-    <line x1="60" y1="70" x2="47" y2="108" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-    <line x1="60" y1="70" x2="73" y2="108" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-  `;
-  switch(pattern){
-    case 'curl': {
-      const angle = [0,120,0][stage];
-      return `<svg ${common}>
-        ${head(18)}
-        ${standingBase}
-        <line x1="60" y1="34" x2="46" y2="62" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-        <line x1="60" y1="34" x2="74" y2="58" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-        <g transform="rotate(${angle} 74 58)">
-          <line x1="74" y1="58" x2="74" y2="86" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-          <circle cx="74" cy="86" r="7" fill="currentColor"/>
-        </g>
-      </svg>`;
-    }
-    case 'press': {
-      const handY = [52,8,52][stage];
-      return `<svg ${common}>
-        ${head(18)}
-        ${standingBase}
-        <line x1="60" y1="34" x2="46" y2="60" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-        <line x1="60" y1="34" x2="60" y2="${handY}" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-        <circle cx="60" cy="${handY}" r="8" fill="currentColor"/>
-      </svg>`;
-    }
-    case 'row': {
-      const handX = [88,52,88][stage];
-      return `<svg ${common}>
-        ${head(18)}
-        ${standingBase}
-        <line x1="60" y1="34" x2="46" y2="58" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-        <line x1="60" y1="40" x2="${handX}" y2="52" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-        <circle cx="${handX}" cy="52" r="7" fill="currentColor"/>
-        <circle cx="95" cy="50" r="4" fill="currentColor" opacity="0.35"/>
-      </svg>`;
-    }
-    case 'pull': {
-      const dy = [15,0,15][stage];
-      return `<svg ${common}>
-        <line x1="35" y1="10" x2="85" y2="10" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-        <line x1="47" y1="10" x2="54" y2="${28+dy}" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
-        <line x1="73" y1="10" x2="66" y2="${28+dy}" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
-        ${head(18+dy)}
-        <line x1="60" y1="${27+dy}" x2="60" y2="${64+dy}" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
-        <line x1="60" y1="${64+dy}" x2="52" y2="${Math.min(92+dy,108)}" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-        <line x1="60" y1="${64+dy}" x2="68" y2="${Math.min(92+dy,108)}" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-      </svg>`;
-    }
-    case 'squat': {
-      const kneeY = [76,96,76][stage];
-      return `<svg ${common}>
-        ${head(18)}
-        <line x1="60" y1="27" x2="60" y2="70" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
-        <line x1="60" y1="34" x2="45" y2="58" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-        <line x1="60" y1="34" x2="75" y2="58" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-        <line x1="60" y1="70" x2="44" y2="${kneeY}" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-        <line x1="44" y1="${kneeY}" x2="40" y2="108" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-        <line x1="60" y1="70" x2="76" y2="${kneeY}" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-        <line x1="76" y1="${kneeY}" x2="80" y2="108" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-      </svg>`;
-    }
-    case 'push': {
-      const dy = [0,16,0][stage];
-      return `<svg ${common}>
-        <line x1="10" y1="100" x2="110" y2="100" stroke="currentColor" stroke-width="2" opacity="0.25"/>
-        <circle cx="22" cy="${58+dy}" r="9" fill="currentColor"/>
-        <line x1="31" y1="${58+dy}" x2="90" y2="${62+dy}" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
-        <line x1="90" y1="${62+dy}" x2="106" y2="${64+dy}" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-        <line x1="35" y1="${60+dy}" x2="30" y2="98" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-        <line x1="70" y1="${61+dy}" x2="75" y2="98" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-      </svg>`;
-    }
-    case 'core': {
-      return `<svg ${common}>
-        <line x1="10" y1="84" x2="110" y2="84" stroke="currentColor" stroke-width="2" opacity="0.25"/>
-        <circle cx="18" cy="55" r="9" fill="currentColor"/>
-        <line x1="27" y1="55" x2="95" y2="60" stroke="currentColor" stroke-width="8" stroke-linecap="round"/>
-        <line x1="30" y1="58" x2="26" y2="82" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-        <line x1="95" y1="60" x2="108" y2="62" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-      </svg>`;
-    }
-    default: {
-      const dy = [0,-8,0][stage];
-      return `<svg ${common}>
-        ${head(18)}
-        ${standingBase}
-        <line x1="60" y1="${34+dy}" x2="46" y2="62" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-        <line x1="60" y1="${34+dy}" x2="74" y2="62" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-      </svg>`;
-    }
-  }
+// Muscle map : silhouette avant/arrière générique, zones colorées selon l'exercice
+// (rouge = muscle principal, jaune = secondaire, gris = non sollicité)
+function zoneColor(zone, muscles){
+  if(muscles.primary && muscles.primary.includes(zone)) return '#DB2D26';
+  if(muscles.secondary && muscles.secondary.includes(zone)) return '#F0BE14';
+  return '#585D61';
 }
+function bodyFrontSVG(muscles){
+  const c = (z)=>zoneColor(z, muscles);
+  return `<svg viewBox="0 0 100 200" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="15" r="12" fill="#585D61"/>
+    <rect x="46" y="24" width="8" height="8" fill="#585D61"/>
+    <rect x="30" y="30" width="40" height="70" rx="14" fill="#33383b"/>
+    <rect x="10" y="35" width="16" height="55" rx="8" fill="#33383b"/>
+    <rect x="74" y="35" width="16" height="55" rx="8" fill="#33383b"/>
+    <rect x="32" y="100" width="16" height="80" rx="8" fill="#33383b"/>
+    <rect x="52" y="100" width="16" height="80" rx="8" fill="#33383b"/>
+    <ellipse cx="50" cy="45" rx="16" ry="10" fill="${c('chest')}"/>
+    <circle cx="22" cy="38" r="8" fill="${c('frontDelt')}"/>
+    <circle cx="78" cy="38" r="8" fill="${c('frontDelt')}"/>
+    <rect x="12" y="48" width="12" height="22" rx="6" fill="${c('biceps')}"/>
+    <rect x="76" y="48" width="12" height="22" rx="6" fill="${c('biceps')}"/>
+    <rect x="10" y="72" width="12" height="20" rx="6" fill="${c('forearm')}"/>
+    <rect x="78" y="72" width="12" height="20" rx="6" fill="${c('forearm')}"/>
+    <rect x="42" y="58" width="16" height="30" rx="4" fill="${c('abs')}"/>
+    <rect x="33" y="58" width="8" height="28" rx="3" fill="${c('obliques')}"/>
+    <rect x="59" y="58" width="8" height="28" rx="3" fill="${c('obliques')}"/>
+    <rect x="33" y="105" width="14" height="45" rx="6" fill="${c('quad')}"/>
+    <rect x="53" y="105" width="14" height="45" rx="6" fill="${c('quad')}"/>
+    <rect x="33" y="155" width="14" height="25" rx="5" fill="${c('calfFront')}"/>
+    <rect x="53" y="155" width="14" height="25" rx="5" fill="${c('calfFront')}"/>
+  </svg>`;
+}
+function bodyBackSVG(muscles){
+  const c = (z)=>zoneColor(z, muscles);
+  return `<svg viewBox="0 0 100 200" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="15" r="12" fill="#585D61"/>
+    <rect x="46" y="24" width="8" height="8" fill="#585D61"/>
+    <rect x="30" y="30" width="40" height="70" rx="14" fill="#33383b"/>
+    <rect x="10" y="35" width="16" height="55" rx="8" fill="#33383b"/>
+    <rect x="74" y="35" width="16" height="55" rx="8" fill="#33383b"/>
+    <rect x="32" y="100" width="16" height="80" rx="8" fill="#33383b"/>
+    <rect x="52" y="100" width="16" height="80" rx="8" fill="#33383b"/>
+    <path d="M35,32 L65,32 L60,50 L40,50 Z" fill="${c('traps')}"/>
+    <circle cx="22" cy="40" r="8" fill="${c('rearDelt')}"/>
+    <circle cx="78" cy="40" r="8" fill="${c('rearDelt')}"/>
+    <rect x="12" y="50" width="12" height="20" rx="6" fill="${c('triceps')}"/>
+    <rect x="76" y="50" width="12" height="20" rx="6" fill="${c('triceps')}"/>
+    <path d="M32,52 L68,52 L64,85 L50,95 L36,85 Z" fill="${c('lats')}"/>
+    <rect x="42" y="88" width="16" height="14" rx="4" fill="${c('lowerBack')}"/>
+    <ellipse cx="40" cy="103" rx="10" ry="9" fill="${c('glutes')}"/>
+    <ellipse cx="60" cy="103" rx="10" ry="9" fill="${c('glutes')}"/>
+    <rect x="33" y="112" width="14" height="38" rx="6" fill="${c('hamstring')}"/>
+    <rect x="53" y="112" width="14" height="38" rx="6" fill="${c('hamstring')}"/>
+    <rect x="33" y="155" width="14" height="25" rx="5" fill="${c('calfBack')}"/>
+    <rect x="53" y="155" width="14" height="25" rx="5" fill="${c('calfBack')}"/>
+  </svg>`;
+}
+
+const STAGE_LABELS = ['1. Départ', '2. Effort'];
 
 function openExerciseDetail(name){
   const lib = findLibraryExercise(name);
   document.getElementById('exDetailName').textContent = name || 'Exercice';
   document.getElementById('exDetailType').textContent = lib ? lib.type : 'Exercice personnalisé';
   const pattern = lib ? lib.pattern : 'other';
+  const muscles = lib ? lib.muscles : {primary:[],secondary:[]};
+
   const wrap = document.getElementById('exDetailAnim');
   wrap.innerHTML = `
+    <div class="muscle-map-row">
+      <div class="muscle-map-cell">${bodyFrontSVG(muscles)}<div class="ex-frame-label">Face</div></div>
+      <div class="muscle-map-cell">${bodyBackSVG(muscles)}<div class="ex-frame-label">Dos</div></div>
+    </div>
+    <div class="muscle-legend">
+      <span><i style="background:#DB2D26"></i> Principal</span>
+      <span><i style="background:#F0BE14"></i> Secondaire</span>
+    </div>
     <div class="ex-carousel" id="exCarouselTrack">
-      ${[0,1,2].map(i=>`
+      ${['start','effort'].map((stage,i)=>`
         <div class="ex-frame">
-          <div class="ex-frame-media">${patternFrameSVG(pattern, i)}</div>
+          <div class="ex-frame-media"><img src="./poses/${pattern}-${stage}.jpg" alt="${STAGE_LABELS[i]}"></div>
           <div class="ex-frame-label">${STAGE_LABELS[i]}</div>
         </div>
       `).join('')}
     </div>
-    <div class="ex-dots">${[0,1,2].map(i=>`<span class="ex-dot ${i===0?'active':''}"></span>`).join('')}</div>
-    <div class="ex-swipe-hint">‹ Fais glisser pour voir les phases ›</div>
+    <div class="ex-dots">${[0,1].map(i=>`<span class="ex-dot ${i===0?'active':''}"></span>`).join('')}</div>
+    <div class="ex-swipe-hint">‹ Fais glisser pour voir l'exécution ›</div>
   `;
   const track = document.getElementById('exCarouselTrack');
   const dots = wrap.querySelectorAll('.ex-dot');
