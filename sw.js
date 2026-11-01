@@ -1,7 +1,5 @@
-const CACHE_NAME = 'muscu-cache-v4';
-const POSE_PATTERNS = ['curl','press','push','pull','row','squat','core','other'];
-const POSE_ASSETS = POSE_PATTERNS.flatMap(p => [`./poses/${p}-start.jpg`, `./poses/${p}-effort.jpg`]);
-const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './bg-statue.jpg', ...POSE_ASSETS];
+const CACHE_NAME = 'muscu-cache-v6';
+const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './bg-statue.jpg'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(ASSETS)));
