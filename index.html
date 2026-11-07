@@ -358,6 +358,35 @@
   .week-head span:nth-child(2){color:#8FBBFF;} .week-head span:nth-child(3){color:#FFB173;}
   .week-row select.m{border-color:rgba(59,130,246,.6);} .week-row select.r{border-color:rgba(251,146,60,.6);}
   .run-card .ex-name{text-decoration:none;border:none;margin-right:10px;}
+
+  /* ===== v6 : étape 2 (repos, records, EMOM, récupération) ===== */
+  .last-line{font-size:11.5px;color:var(--accent2);margin:0 0 6px;}
+  .last-hint{display:none;font-size:12.5px;line-height:1.55;background:rgba(59,130,246,.16);border:1px solid rgba(110,160,255,.4);border-radius:10px;padding:10px 12px;margin:0 0 12px;}
+  .last-hint b{color:#fff;}
+  .rest-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 12px;font-size:12.5px;color:var(--ink-soft);flex-wrap:wrap;}
+  .rest-chips{display:flex;gap:5px;}
+  .rest-chips button{border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);border-radius:999px;padding:6px 11px;font-size:12px;cursor:pointer;font-family:inherit;}
+  .rest-chips button.on{background:var(--steel);border-color:var(--steel);color:#fff;}
+  #restBar{position:fixed;left:12px;right:12px;bottom:14px;z-index:58;display:none;align-items:center;gap:10px;background:rgba(8,20,46,.96);
+    border:1px solid rgba(110,160,255,.6);border-radius:16px;padding:10px 12px;box-shadow:0 10px 30px rgba(0,0,0,.5);}
+  #restBar.show{display:flex;}
+  #restBar.done{border-color:#3DD68C;background:rgba(10,48,32,.96);}
+  #restBar .rb-info{flex:1;}
+  #restLabel{font-size:11.5px;color:var(--ink-soft);}
+  #restTime{font-size:26px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;line-height:1.1;}
+  #restBar button{border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;border-radius:10px;padding:8px 10px;font-size:12.5px;cursor:pointer;font-family:inherit;}
+  #restBar #restSkip{background:var(--steel);border-color:var(--steel);}
+  #toast{position:fixed;left:50%;top:64px;transform:translate(-50%,-16px);opacity:0;pointer-events:none;z-index:90;max-width:88%;text-align:center;
+    background:rgba(20,16,4,.96);border:1px solid #F5B83D;color:#FFE9B8;border-radius:14px;padding:11px 16px;font-size:14px;font-weight:600;transition:all .25s;box-shadow:0 10px 30px rgba(0,0,0,.5);}
+  #toast.show{opacity:1;transform:translate(-50%,0);}
+  .rec-row{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:7px 0;border-top:1px dashed var(--line);}
+  .rec-row:first-of-type{border-top:none;}
+  .rec-row b{text-align:right;color:#fff;font-weight:600;}
+  .rec-row small{color:var(--ink-soft);font-weight:400;}
+  .fav-row{display:flex;gap:6px;margin-bottom:6px;}
+  .fav-load{flex:1;text-align:left;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);border-radius:10px;padding:10px 12px;font-size:13px;cursor:pointer;font-family:inherit;}
+  .fav-del{border:1px solid var(--line);background:rgba(0,0,0,.3);color:var(--ink);border-radius:10px;width:38px;cursor:pointer;font-size:16px;}
+  #emomAwake{font-size:12px;color:var(--ink-soft);margin:6px 0;text-align:center;min-height:16px;}
 </style>
 </head>
 <body data-view="home">
@@ -417,6 +446,7 @@
       <span class="cur" id="curDate">—</span>
       <button id="nextDay">›</button>
     </div>
+    <div class="rest-row"><span>⏱ Repos entre les séries</span><div class="rest-chips" id="restChips"><button data-s="0" type="button">Aucun</button><button data-s="60" type="button">60 s</button><button data-s="90" type="button">90 s</button><button data-s="120" type="button">2 min</button></div></div>
     <div id="exList"></div>
     <button class="add-fab" id="openAddEx">+ Ajouter un exercice</button>
   </div>
@@ -438,6 +468,7 @@
   <!-- EMOM -->
   <div class="view" id="view-emom">
     <div class="emom-setup" id="emomSetup">
+      <div id="emomFavs"></div>
       <div class="name-row">
         <div class="field">
           <label>Exercice</label>
@@ -456,12 +487,14 @@
         <div class="field"><label>Nombre de tours</label><input type="number" id="emomRounds" value="7"></div>
       </div>
       <button class="primary-btn" id="emomStartBtn">Démarrer</button>
+      <button class="secondary-btn" id="emomFavSave" type="button">⭐ Enregistrer ce réglage en favori</button>
     </div>
 
     <div class="emom-display" id="emomDisplay" style="display:none;">
       <div class="emom-phase" id="emomPhaseLbl">EFFORT</div>
       <div class="emom-time" id="emomTimeLeft">60</div>
       <div class="emom-round" id="emomRoundLbl">Tour 1 / 7 — 3 répétitions</div>
+      <div id="emomAwake"></div>
       <div class="emom-controls">
         <button class="btn-stop" id="emomStopBtn">Arrêter</button>
       </div>
@@ -480,6 +513,7 @@
 
   <!-- PROGRESSION -->
   <div class="view" id="view-progression">
+    <div id="recoveryCard"></div>
     <div class="field prog-select">
       <label>Exercice</label>
       <select id="progExSelect"></select>
@@ -493,6 +527,8 @@
       <div class="empty-hint">Pas encore de données pour cet exercice</div>
     </div>
     <div class="stat-row" id="progStats"></div>
+    <div id="recordsCard"></div>
+    <div id="allRecords"></div>
   </div>
   <div class="view" id="view-stretch">
     <div class="card">
@@ -562,6 +598,7 @@
       <button type="button" class="info-btn" id="sheetBrowseBtn" title="Parcourir">☰</button>
       <button type="button" class="info-btn" id="sheetInfoBtn">ⓘ</button>
     </div>
+    <div class="last-hint" id="sheetLast"></div>
     <div class="row3">
       <div class="field"><label>Répétitions</label><input type="number" id="sheetReps"></div>
       <div class="field"><label>Poids (kg, optionnel)</label><input type="number" id="sheetWeight"></div>
@@ -650,6 +687,9 @@
     <button class="secondary-btn" id="loadCancel">Annuler</button>
   </div>
 </div>
+
+<div id="restBar"><div class="rb-info"><div id="restLabel">Repos</div><div id="restTime">1:30</div></div><button id="restMinus" type="button">−15 s</button><button id="restPlus" type="button">+15 s</button><button id="restSkip" type="button">Passer</button></div>
+<div id="toast" role="status"></div>
 
 <script>
 // ---------- Storage (fonctionne dans Claude et en fichier local via localStorage) ----------
@@ -781,14 +821,14 @@ function findLibraryExercise(name){
 function zoneColor(zone, muscles){
   if(muscles.primary && muscles.primary.includes(zone)) return '#E5484D';
   if(muscles.secondary && muscles.secondary.includes(zone)) return '#F5B83D';
-  return '#5B6E91';
+  return muscles.base || '#5B6E91';
 }
 function anatSVG(view, muscles){
   const col = z => zoneColor(z, muscles);
   const S = '#0E1A33';
   // une zone symétrique : chemin du côté droit du dessin + son miroir
   const Z = (zone, d, extra) => {
-    const f = col(zone), on = f !== '#5B6E91';
+    const f = col(zone), on = (muscles.primary||[]).includes(zone) || (muscles.secondary||[]).includes(zone);
     const a = `fill="${f}" stroke="${S}" stroke-width="${on?1.1:0.9}" stroke-linejoin="round"`;
     return `<path d="${d}" ${a}${extra||''}/><path d="${d}" ${a} transform="matrix(-1 0 0 1 200 0)"${extra||''}/>`;
   };
@@ -933,6 +973,7 @@ async function loadDayLog(d){
 }
 async function saveDayLog(d, entries){
   await storageSet(logKey(d), JSON.stringify(entries));
+  historyCache = null;
 }
 
 function setsSummary(entry){
@@ -943,6 +984,8 @@ function setsSummary(entry){
 async function renderJournal(){
   document.getElementById('curDate').textContent = fmtDate(currentDate);
   const entries = await loadDayLog(currentDate);
+  const lastMap = {};
+  for(const ex of [...new Set(entries.map(e=>e.exercise))]){ const l = await lastSession(ex, currentDate); if(l) lastMap[ex] = l; }
   const listEl = document.getElementById('exList');
   listEl.innerHTML = '';
   if(entries.length===0){
@@ -969,6 +1012,7 @@ async function renderJournal(){
         <button class="del-ex" data-id="${en.id}">×</button>
       </div>
       <div style="font-size:11px;color:var(--ink-soft);margin-bottom:6px;">${setsSummary(en)}</div>
+      ${lastMap[en.exercise] ? `<div class="last-line">Dernière fois (${fmtDateShort(lastMap[en.exercise].date)}) : ${fmtSetsSummary(lastMap[en.exercise].sets)}</div>` : ''}
       ${setsHtml}
       <button class="add-set-btn" data-entry="${en.id}">+ Série</button>
       <textarea class="note-input" data-entry="${en.id}" placeholder="Note (ressenti, à changer la prochaine fois...)">${en.note}</textarea>
@@ -992,9 +1036,13 @@ async function renderJournal(){
       const en = entries2.find(e=>e.id===btn.dataset.entry);
       if(!en) return;
       const s = en.sets[parseInt(btn.dataset.i)];
-      s.validated = !s.validated;
+      const willValidate = !s.validated;
+      let recMsg = null;
+      if(willValidate && s.reps>0) recMsg = await checkRecord(en.exercise, s);
+      s.validated = willValidate;
       await saveDayLog(currentDate, entries2);
       renderJournal();
+      if(willValidate){ startRest(); if(recMsg) showToast(recMsg); }
     };
   });
   listEl.querySelectorAll('.set-del').forEach(btn=>{
@@ -1934,6 +1982,300 @@ function applyTheme(name){
   const t = document.getElementById('appTitle'); if(t) t.textContent = orange ? 'Journal Run' : 'Journal Muscu';
 }
 
+// =====================================================================
+//  ÉTAPE 2 : séries pré-remplies, repos, records, EMOM, récupération
+// =====================================================================
+const ZONE_FR = {neck:'cou',traps:'trapèzes',frontDelt:'épaules (avant)',rearDelt:'épaules (arrière)',chest:'pectoraux',biceps:'biceps',triceps:'triceps',forearm:'avant-bras',abs:'abdominaux',obliques:'obliques',lats:'grand dorsal',midBack:'milieu du dos',lowerBack:'lombaires',glutes:'fessiers',abductor:'abducteurs',adductor:'adducteurs',hipFlexor:'fléchisseurs de hanche',quad:'quadriceps',hamstring:'ischio-jambiers',calfFront:'tibias',calfBack:'mollets'};
+const ALL_ZONES = Object.keys(ZONE_FR);
+
+// ---------- Historique des séances de muscu ----------
+let historyCache = null;
+async function muscuHistory(){
+  if(historyCache) return historyCache;
+  const keys = (await storageListKeys('log:')).slice().sort();
+  const out = [];
+  for(const k of keys){
+    const raw = await storageGet(k); if(!raw) continue;
+    let entries; try{ entries = JSON.parse(raw); }catch(e){ continue; }
+    entries.forEach(e=>{ e.sets.forEach(s=>{ if(s.validated===undefined) s.validated = true; }); });
+    out.push({key:k, date:k.slice(4), entries});
+  }
+  historyCache = out; return out;
+}
+function fmtDateShort(key){ const p = key.split('-').map(Number); return new Date(p[0], p[1]-1, p[2], 12).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}); }
+const kgFmt = v => String(Math.round(v*100)/100).replace('.',',');
+function fmtSetsSummary(sets){
+  if(!sets.length) return '';
+  const same = sets.every(s=>s.reps===sets[0].reps && (s.weight||0)===(sets[0].weight||0));
+  if(same) return sets.length+' × '+sets[0].reps+((sets[0].weight||0)>0 ? ' à '+kgFmt(sets[0].weight)+' kg' : '');
+  return sets.map(s=>s.reps+((s.weight||0)>0 ? '×'+kgFmt(s.weight)+' kg' : '')).join(', ');
+}
+async function lastSession(exercise, beforeDate){
+  const hist = await muscuHistory(), lim = logKey(beforeDate);
+  for(let i=hist.length-1;i>=0;i--){
+    if(hist[i].key >= lim) continue;
+    const sets = [].concat(...hist[i].entries.filter(e=>e.exercise===exercise).map(e=>e.sets.filter(s=>s.validated!==false && s.reps>0)));
+    if(sets.length) return {date:hist[i].date, sets};
+  }
+  return null;
+}
+
+// ---------- Fiche d'ajout : proposer la dernière séance ----------
+let sheetLastSets = null;
+async function updateSheetLast(){
+  const box = document.getElementById('sheetLast');
+  const name = document.getElementById('sheetExName').value.trim();
+  const repsIn = document.getElementById('sheetReps'), wIn = document.getElementById('sheetWeight');
+  repsIn.placeholder = ''; wIn.placeholder = '';
+  sheetLastSets = null;
+  if(!name){ box.style.display = 'none'; return; }
+  const last = await lastSession(name, currentDate);
+  if(!last){ box.style.display = 'none'; return; }
+  sheetLastSets = last.sets;
+  const lastSet = last.sets[last.sets.length-1];
+  repsIn.placeholder = String(lastSet.reps); wIn.placeholder = lastSet.weight ? String(lastSet.weight) : '0';
+  box.innerHTML = `<b>Dernière fois (${fmtDateShort(last.date)}) :</b> ${fmtSetsSummary(last.sets)}<button type="button" class="secondary-btn" id="sheetReuse" style="margin-top:8px;">Reprendre ces ${last.sets.length} séries</button>`;
+  box.style.display = 'block';
+  document.getElementById('sheetReuse').onclick = ()=>{
+    sheetSets = sheetLastSets.map(s=>({reps:s.reps, weight:s.weight||0}));
+    renderSheetSets();
+  };
+}
+document.getElementById('sheetExName').addEventListener('input', updateSheetLast);
+document.getElementById('sheetExName').addEventListener('change', updateSheetLast);
+const _openExerciseSheet = openExerciseSheet;
+openExerciseSheet = function(mode){ _openExerciseSheet(mode); updateSheetLast(); };
+
+// ---------- Records personnels ----------
+function e1rm(w, reps){ if(!(w>0) || !(reps>0) || reps>12) return 0; return reps===1 ? w : w*(1+reps/30); }
+function recordsFromHistory(hist, exercise){
+  const r = {any:false, w:{v:0}, e1:{v:0}, reps:{v:0}, total:{v:0}};
+  hist.forEach(day=>{
+    let dayTotal = 0;
+    day.entries.filter(e=>e.exercise===exercise).forEach(en=>en.sets.forEach(s=>{
+      if(s.validated===false || !(s.reps>0)) return;
+      r.any = true; dayTotal += s.reps;
+      const w = s.weight||0;
+      if(w>r.w.v || (w===r.w.v && w>0 && s.reps>(r.w.reps||0))) r.w = {v:w, reps:s.reps, date:day.date};
+      const e = e1rm(w, s.reps); if(e>r.e1.v) r.e1 = {v:e, w, reps:s.reps, date:day.date};
+      if(s.reps>r.reps.v) r.reps = {v:s.reps, w, date:day.date};
+    }));
+    if(dayTotal>r.total.v) r.total = {v:dayTotal, date:day.date};
+  });
+  return r;
+}
+async function checkRecord(exercise, set){
+  const prev = recordsFromHistory(await muscuHistory(), exercise);
+  if(!prev.any) return null;
+  const w = set.weight||0, reps = set.reps||0;
+  if(w>0 && prev.w.v>0 && w>prev.w.v) return '🏆 Nouveau record de charge : '+kgFmt(w)+' kg × '+reps;
+  if(w>0 && prev.e1.v>0 && e1rm(w,reps)>prev.e1.v+0.01) return '🏆 Nouveau record de 1RM estimé : '+kgFmt(Math.round(e1rm(w,reps)*10)/10)+' kg';
+  if(w===0 && reps>prev.reps.v) return '🏆 Nouveau record de répétitions : '+reps;
+  return null;
+}
+let toastTimer = null;
+function showToast(msg){
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 4500);
+  if(navigator.vibrate) navigator.vibrate([80,60,80]);
+}
+async function renderExerciseRecords(exercise){
+  const el = document.getElementById('recordsCard'); if(!el) return;
+  if(!exercise){ el.innerHTML = ''; return; }
+  const r = recordsFromHistory(await muscuHistory(), exercise);
+  if(!r.any){ el.innerHTML = ''; return; }
+  const row = (l,v)=>`<div class="rec-row"><span>${l}</span><b>${v}</b></div>`;
+  let rows = '';
+  if(r.w.v>0) rows += row('Meilleure charge', kgFmt(r.w.v)+' kg × '+r.w.reps+' <small>('+fmtDateShort(r.w.date)+')</small>');
+  if(r.e1.v>0) rows += row('1RM estimé', kgFmt(Math.round(r.e1.v*10)/10)+' kg <small>('+kgFmt(r.e1.w)+' kg × '+r.e1.reps+', '+fmtDateShort(r.e1.date)+')</small>');
+  rows += row('Plus de répétitions sur une série', r.reps.v+' <small>('+fmtDateShort(r.reps.date)+')</small>');
+  rows += row('Meilleur total en une séance', r.total.v+' rép. <small>('+fmtDateShort(r.total.date)+')</small>');
+  el.innerHTML = `<div class="card" style="margin-top:16px;"><h3 class="st-h3" style="margin-top:0">🏆 Mes records : ${escHtml(exercise)}</h3>${rows}
+    <p class="info-note" style="margin-top:8px;">Le 1RM estimé est la charge théorique pour une seule répétition (formule d\u2019Epley, fiable jusqu\u2019à environ 12 répétitions).</p></div>`;
+}
+async function renderAllRecords(){
+  const el = document.getElementById('allRecords'); if(!el) return;
+  const hist = await muscuHistory();
+  const names = [...new Set([].concat(...hist.map(d=>d.entries.map(e=>e.exercise))))];
+  const rows = names.map(n=>({n, r:recordsFromHistory(hist, n)})).filter(x=>x.r.any).sort((a,b)=>a.n.localeCompare(b.n,'fr'));
+  if(rows.length===0){ el.innerHTML = ''; return; }
+  el.innerHTML = `<details class="card run-info" style="margin-top:14px;"><summary>🏆 Tous mes records</summary><div class="ri-body">` + rows.map(x=>{
+    const r = x.r; const main = r.w.v>0 ? kgFmt(r.w.v)+' kg × '+r.w.reps : r.reps.v+' rép.';
+    const sub = r.e1.v>0 ? ' · 1RM ≈ '+kgFmt(Math.round(r.e1.v*10)/10)+' kg' : '';
+    return `<div class="rec-row"><span>${escHtml(x.n)}</span><b>${main}<small>${sub}</small></b></div>`;
+  }).join('') + `</div></details>`;
+}
+
+// ---------- Minuteur de repos entre les séries ----------
+let restSeconds = 90, restEnd = 0, restTick = null;
+function unlockAudio(){ try{ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') audioCtx.resume(); }catch(e){} }
+async function loadRestSetting(){
+  const raw = await storageGet('rest-seconds'); const n = parseInt(raw,10);
+  restSeconds = isNaN(n) ? 90 : n; renderRestChips();
+}
+function renderRestChips(){ document.querySelectorAll('#restChips button').forEach(b=>b.classList.toggle('on', parseInt(b.dataset.s)===restSeconds)); }
+document.querySelectorAll('#restChips button').forEach(b=>{
+  b.onclick = async ()=>{ restSeconds = parseInt(b.dataset.s); await storageSet('rest-seconds', String(restSeconds)); renderRestChips(); };
+});
+function stopRest(){ clearInterval(restTick); document.getElementById('restBar').classList.remove('show','done'); }
+function updateRest(){
+  const left = Math.max(0, Math.ceil((restEnd - Date.now())/1000));
+  document.getElementById('restTime').textContent = Math.floor(left/60)+':'+String(left%60).padStart(2,'0');
+  const bar = document.getElementById('restBar');
+  if(left<=0){
+    clearInterval(restTick); bar.classList.add('done');
+    document.getElementById('restLabel').textContent = 'Repos terminé : c\u2019est reparti !';
+    beep(); setTimeout(beep, 280); if(navigator.vibrate) navigator.vibrate([200,100,200]);
+    setTimeout(()=>{ if(bar.classList.contains('done')) stopRest(); }, 5000);
+  } else document.getElementById('restLabel').textContent = 'Repos';
+}
+function startRest(){
+  if(!(restSeconds>0)) return;
+  unlockAudio();
+  restEnd = Date.now() + restSeconds*1000;
+  const bar = document.getElementById('restBar'); bar.classList.remove('done'); bar.classList.add('show');
+  clearInterval(restTick); restTick = setInterval(updateRest, 250); updateRest();
+}
+document.getElementById('restMinus').onclick = ()=>{ restEnd -= 15000; updateRest(); };
+document.getElementById('restPlus').onclick = ()=>{ restEnd += 15000; if(document.getElementById('restBar').classList.contains('done')){ document.getElementById('restBar').classList.remove('done'); clearInterval(restTick); restTick = setInterval(updateRest,250); } updateRest(); };
+document.getElementById('restSkip').onclick = stopRest;
+
+// ---------- Carte de récupération ----------
+async function computeRecovery(){
+  const hist = await muscuHistory();
+  const score = {}; ALL_ZONES.forEach(z=>score[z]=0);
+  const today = new Date(); today.setHours(12,0,0,0);
+  const DECAY = [1.0, 0.7, 0.3];
+  let sessions = 0;
+  for(let a=0;a<3;a++){
+    const d = new Date(today); d.setDate(d.getDate()-a);
+    const day = hist.find(h=>h.key===logKey(d));
+    if(day) day.entries.forEach(en=>{
+      const n = en.sets.filter(s=>s.validated!==false).length; if(!n) return;
+      const lib = findLibraryExercise(en.exercise); if(!lib) return;
+      sessions++;
+      const inten = Math.min(1.5, n/3);
+      lib.muscles.primary.forEach(z=>{ if(z in score) score[z] += 1.0*DECAY[a]*inten; });
+      lib.muscles.secondary.forEach(z=>{ if(z in score) score[z] += 0.5*DECAY[a]*inten; });
+    });
+    const raw = await storageGet('runlog:'+dateKey(d));
+    if(raw){ try{ JSON.parse(raw).filter(runDone).forEach(r=>{ const I = RUN_INFO[r.type]; if(!I) return; sessions++;
+      I.muscles.primary.forEach(z=>{ score[z] += 0.8*DECAY[a]; }); I.muscles.secondary.forEach(z=>{ score[z] += 0.3*DECAY[a]; }); }); }catch(e){} }
+  }
+  return {score, sessions};
+}
+async function renderRecovery(){
+  const el = document.getElementById('recoveryCard'); if(!el) return;
+  const {score, sessions} = await computeRecovery();
+  const red = ALL_ZONES.filter(z=>score[z]>=1.0), yel = ALL_ZONES.filter(z=>score[z]>=0.4 && score[z]<1.0);
+  const m = {primary:red, secondary:yel, base:'#3DD68C'};
+  const names = list => list.map(z=>ZONE_FR[z]).join(', ');
+  let advice = 'Aucune séance enregistrée ces 3 derniers jours : tous tes muscles sont prêts.';
+  if(sessions>0) advice = red.length ? 'Aujourd\u2019hui, travaille plutôt un autre groupe musculaire, ou prends un jour de repos.'
+    : (yel.length ? 'Tu peux t\u2019entraîner, mais évite de forcer sur les muscles en jaune.' : 'Tout est récupéré : bonne séance !');
+  el.innerHTML = `<div class="card" style="margin-bottom:16px;"><h3 class="st-h3" style="margin-top:0">Récupération musculaire</h3>
+    <p class="info-p" style="margin-top:0">Estimée d\u2019après tes séances des 3 derniers jours (muscu et run).</p>
+    <div class="muscle-map-row" style="margin-top:10px;"><div class="muscle-map-cell">${bodyFrontSVG(m)}<div class="ex-frame-label">Face</div></div><div class="muscle-map-cell">${bodyBackSVG(m)}<div class="ex-frame-label">Dos</div></div></div>
+    <div class="muscle-legend" style="flex-wrap:wrap;"><span><i style="background:#E5484D"></i> À laisser reposer</span><span><i style="background:#F5B83D"></i> En récupération</span><span><i style="background:#3DD68C"></i> Prêt</span></div>
+    ${red.length ? `<p class="info-p"><b>À laisser reposer :</b> ${names(red)}.</p>` : ''}
+    ${yel.length ? `<p class="info-p"><b>En récupération :</b> ${names(yel)}.</p>` : ''}
+    <p class="info-p"><b>${advice}</b></p>
+    <p class="info-note">Estimation indicative : la récupération dépend aussi de ton sommeil, de ton alimentation et de l\u2019intensité réelle de la séance.</p></div>`;
+}
+
+// ---------- EMOM : décompte, écran allumé, favoris ----------
+let emomPrepTimer = null, emomActive = false, wakeLock = null;
+async function keepAwake(on){
+  try{
+    if(on){ if('wakeLock' in navigator && !wakeLock){ wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', ()=>{ wakeLock = null; }); } }
+    else if(wakeLock){ await wakeLock.release(); wakeLock = null; }
+  }catch(e){ wakeLock = null; }
+  const t = document.getElementById('emomAwake');
+  if(t) t.textContent = wakeLock ? '🔆 Écran maintenu allumé' : (on ? 'Garde l\u2019écran allumé pendant la séance' : '');
+}
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && emomActive) keepAwake(true); });
+function beepShort(){
+  try{
+    unlockAudio();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine'; o.frequency.value = 660; g.gain.value = 0.12;
+    o.connect(g); g.connect(audioCtx.destination); o.start(); setTimeout(()=>o.stop(), 90);
+  }catch(e){}
+  if(navigator.vibrate) navigator.vibrate(40);
+}
+function readEmomSetup(){
+  return { exercise: document.getElementById('emomExName').value.trim() || 'Exercice',
+    reps: parseInt(document.getElementById('emomReps').value) || 1,
+    effortSec: parseInt(document.getElementById('emomInterval').value) || 60,
+    restSec: parseInt(document.getElementById('emomRest').value) || 0,
+    rounds: parseInt(document.getElementById('emomRounds').value) || 1 };
+}
+function beginEmomRun(){
+  updateEmomDisplay(); beep(); speak('Départ');
+  emomState.completed = 1;
+  emomTimer = setInterval(tickEmom, 1000);
+}
+document.getElementById('emomStartBtn').onclick = ()=>{
+  unlockAudio();
+  const cfg = readEmomSetup();
+  emomState = Object.assign({}, cfg, { round:1, phase:'effort', timeLeft: cfg.effortSec, completed:0 });
+  document.getElementById('emomSetup').style.display = 'none';
+  document.getElementById('emomSummary').style.display = 'none';
+  document.getElementById('emomDisplay').style.display = 'block';
+  emomActive = true; keepAwake(true);
+  let n = 3;
+  document.getElementById('emomPhaseLbl').textContent = 'Prépare-toi';
+  document.getElementById('emomTimeLeft').textContent = n;
+  document.getElementById('emomRoundLbl').textContent = cfg.exercise+' : '+cfg.rounds+' tours de '+cfg.reps+' répétitions';
+  beepShort();
+  emomPrepTimer = setInterval(()=>{
+    n--;
+    if(n>0){ document.getElementById('emomTimeLeft').textContent = n; beepShort(); }
+    else { clearInterval(emomPrepTimer); emomPrepTimer = null; beginEmomRun(); }
+  }, 1000);
+};
+async function loadEmomFavs(){ const raw = await storageGet('emom-favs'); try{ return raw ? JSON.parse(raw) : []; }catch(e){ return []; } }
+function favLabel(f){ return f.exercise+' · '+f.reps+' rép. · '+f.effortSec+' s'+(f.restSec>0 ? ' / '+f.restSec+' s repos' : '')+' · '+f.rounds+' tours'; }
+async function renderEmomFavs(){
+  const favs = await loadEmomFavs(); const el = document.getElementById('emomFavs');
+  if(favs.length===0){ el.innerHTML = ''; return; }
+  el.innerHTML = '<div class="rf-hint" style="margin:0 0 6px;">⭐ Mes EMOM favoris</div>' + favs.map(f=>
+    `<div class="fav-row"><button type="button" class="fav-load" data-id="${f.id}">${escHtml(favLabel(f))}</button><button type="button" class="fav-del" data-id="${f.id}">×</button></div>`).join('');
+  el.querySelectorAll('.fav-load').forEach(b=>{ b.onclick = async ()=>{
+    const f = (await loadEmomFavs()).find(x=>x.id===b.dataset.id); if(!f) return;
+    document.getElementById('emomExName').value = f.exercise; document.getElementById('emomReps').value = f.reps;
+    document.getElementById('emomInterval').value = f.effortSec; document.getElementById('emomRest').value = f.restSec; document.getElementById('emomRounds').value = f.rounds;
+  }; });
+  el.querySelectorAll('.fav-del').forEach(b=>{ b.onclick = async ()=>{ await storageSet('emom-favs', JSON.stringify((await loadEmomFavs()).filter(x=>x.id!==b.dataset.id))); renderEmomFavs(); }; });
+}
+document.getElementById('emomFavSave').onclick = async ()=>{
+  const cfg = readEmomSetup(); const favs = await loadEmomFavs();
+  if(!favs.some(f=>favLabel(f)===favLabel(cfg))) favs.push(Object.assign({id:Date.now().toString(36)}, cfg));
+  await storageSet('emom-favs', JSON.stringify(favs));
+  renderEmomFavs(); showToast('⭐ EMOM enregistré en favori');
+};
+document.getElementById('emomStopBtn').onclick = ()=>{
+  if(emomPrepTimer){
+    clearInterval(emomPrepTimer); emomPrepTimer = null; emomActive = false; keepAwake(false);
+    document.getElementById('emomDisplay').style.display = 'none'; document.getElementById('emomSetup').style.display = 'block';
+    return;
+  }
+  finishEmom();
+};
+
+// ---------- Progression : ouvrir sur le dernier exercice pratiqué ----------
+let progUserChose = false;
+document.getElementById('progExSelect').addEventListener('change', ()=>{ progUserChose = true; });
+async function pickRecentProgExercise(){
+  if(progUserChose) return;
+  const sel = document.getElementById('progExSelect');
+  const hist = await muscuHistory();
+  for(let i=hist.length-1;i>=0;i--){
+    const en = hist[i].entries.find(e=>e.sets.some(s=>s.validated!==false && s.reps>0));
+    if(en && [...sel.options].some(o=>o.value===en.exercise)){ sel.value = en.exercise; return; }
+  }
+}
+
 // ---------- Tabs ----------
 function showView(name){
   document.body.dataset.view = name;
@@ -1941,8 +2283,9 @@ function showView(name){
   document.querySelectorAll('.tabbtn').forEach(b=>b.classList.toggle('active', b.dataset.view===name));
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id==='view-'+name));
   if(name==='home') renderHome();
-  if(name==='journal') renderJournal();
-  if(name==='progression') renderProgression();
+  if(name==='journal'){ renderJournal(); loadRestSetting(); }
+  if(name==='emom'){ stopRest(); renderEmomFavs(); }
+  if(name==='progression'){ pickRecentProgExercise().then(()=>{ renderProgression(); renderRecovery(); renderAllRecords(); }); }
   if(name==='programmes') setProgMode(progMode);
   if(name==='run') renderRun();
   if(name==='statsrun') renderStatsRun();
@@ -2000,24 +2343,6 @@ function beep(){
   if(navigator.vibrate) navigator.vibrate(200);
 }
 
-document.getElementById('emomStartBtn').onclick = ()=>{
-  const exercise = document.getElementById('emomExName').value.trim() || 'Exercice';
-  const reps = parseInt(document.getElementById('emomReps').value) || 1;
-  const effortSec = parseInt(document.getElementById('emomInterval').value) || 60;
-  const restSec = parseInt(document.getElementById('emomRest').value) || 0;
-  const rounds = parseInt(document.getElementById('emomRounds').value) || 1;
-
-  emomState = { exercise, reps, effortSec, restSec, rounds, round:1, phase:'effort', timeLeft: effortSec, completed:0 };
-  document.getElementById('emomSetup').style.display='none';
-  document.getElementById('emomSummary').style.display='none';
-  document.getElementById('emomDisplay').style.display='block';
-  updateEmomDisplay();
-  beep();
-  speak('Départ');
-  emomState.completed = 1;
-  emomTimer = setInterval(tickEmom, 1000);
-};
-
 function updateEmomDisplay(){
   document.getElementById('emomPhaseLbl').textContent = emomState.phase === 'effort' ? 'Effort' : 'Repos';
   document.getElementById('emomTimeLeft').textContent = emomState.timeLeft;
@@ -2049,10 +2374,10 @@ function tickEmom(){
   updateEmomDisplay();
 }
 
-document.getElementById('emomStopBtn').onclick = ()=>{ finishEmom(); };
 
 function finishEmom(){
   clearInterval(emomTimer);
+  emomActive = false; keepAwake(false);
   if('speechSynthesis' in window) speechSynthesis.cancel();
   document.getElementById('emomDisplay').style.display='none';
   document.getElementById('emomSummary').style.display='block';
@@ -2096,8 +2421,9 @@ document.getElementById('progExSelect').onchange = renderProgression;
 
 async function renderProgression(){
   const sel = document.getElementById('progExSelect');
-  if(!sel.value) return;
+  if(!sel.value){ renderExerciseRecords(''); return; }
   const exercise = sel.value;
+  renderExerciseRecords(exercise);
   const keys = await storageListKeys('log:');
   const points = [];
   const sortedKeys = keys.slice().sort();
